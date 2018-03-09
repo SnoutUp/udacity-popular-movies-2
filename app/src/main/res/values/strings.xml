@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+
+    <string name="title_popular">Popular Movies</string>
+    <string name="title_best_rated">Top Rated Movies</string>
+
+    <string name="menu_sorting">Sort Options</string>
+    <string name="menu_most_popular">Most popular</string>
+    <string name="menu_top_rated">Top rated</string>
+
+    <string name="poster_description">Movie poster</string>
+    <string name="activity_title_movie_info">Movie Info</string>
+
+    <string name="rating_label_format">%.1f/10</string>
+
+    <string name="error_failed_to_load_data">Failed to load application data</string>
+</resources>

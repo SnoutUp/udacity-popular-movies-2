@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context="com.udacity.garuolis.popularmovies.DetailsActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="32dp">
+
+            <ImageView
+                android:id="@+id/iv_poster"
+                android:layout_width="250dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/colorLtGrey"
+                android:contentDescription="@string/poster_description"
+                android:scaleType="centerCrop"
+                app:layout_constraintDimensionRatio="10:16"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_original_title"/>
+
+            <TextView
+                android:id="@+id/tv_title"
+                style="@style/MovieTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Maze Runner"/>
+
+            <TextView
+                android:id="@+id/tv_original_title"
+                style="@style/MovieSubtitle"
+                android:visibility="gone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title"
+                tools:text="Labirinto bėgikas"/>
+
+            <TextView
+                android:id="@+id/tv_release_date"
+                style="@style/MovieInfoLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:drawableLeft="@drawable/ic_date"
+                android:drawableStart="@drawable/ic_date"
+                app:layout_constraintEnd_toStartOf="@+id/tv_user_rating"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/iv_poster"
+                tools:text="2018-07-11"/>
+
+            <TextView
+                android:id="@+id/tv_user_rating"
+                style="@style/MovieInfoLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginTop="8dp"
+                android:drawableLeft="@drawable/ic_rating"
+                android:drawableStart="@drawable/ic_rating"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_release_date"
+                app:layout_constraintTop_toBottomOf="@+id/iv_poster"
+                tools:text="5/10"/>
+
+            <TextView
+                android:id="@+id/tv_plot_synopsis"
+                style="@style/MovieDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_release_date"
+                tools:text="It is not a very good movie, since there's only one maze and it's not fun to run at all."/>
+
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</layout>
