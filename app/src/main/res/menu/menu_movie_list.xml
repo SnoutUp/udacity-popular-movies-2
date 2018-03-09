@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Using nested menu to add menu item icons. Easiest method I've found.
+        https://stackoverflow.com/questions/30248628/can-i-show-icon-in-overflow-menu-of-android-toolbar
+    -->
+
+    <item android:title="@string/menu_sorting"
+          android:icon="@drawable/ic_sort"
+          app:showAsAction="ifRoom"
+        >
+        <menu>
+        <item
+            android:icon="@drawable/ic_hot"
+            android:id="@+id/mi_popular"
+            android:title="@string/menu_most_popular"
+            app:showAsAction="never"
+            />
+        <item android:id="@+id/mi_top"
+              android:icon="@drawable/ic_rating"
+              android:title="@string/menu_top_rated"
+              app:showAsAction="never"/>
+        </menu>
+    </item>
+</menu>
