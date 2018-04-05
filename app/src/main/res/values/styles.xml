@@ -28,7 +28,7 @@
     </style>
 
     <style name="MovieDescription" parent="TextAppearance.AppCompat.Body1">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="MovieInfoLabel" parent="TextAppearance.AppCompat.Caption">
@@ -38,4 +38,16 @@
         <item name="android:drawablePadding">4dp</item>
     </style>
 
+
+    <style name="ReviewAuthor" parent="TextAppearance.AppCompat.Headline">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">#777777</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ReviewContent" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textSize">16sp</item>
+    </style>
 </resources>

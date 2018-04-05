@@ -22,6 +22,11 @@
               android:icon="@drawable/ic_rating"
               android:title="@string/menu_top_rated"
               app:showAsAction="never"/>
+
+        <item android:id="@+id/mi_favorites"
+              android:icon="@drawable/ic_rating"
+              android:title="@string/menu_favorites"
+              app:showAsAction="never"/>
         </menu>
     </item>
 </menu>

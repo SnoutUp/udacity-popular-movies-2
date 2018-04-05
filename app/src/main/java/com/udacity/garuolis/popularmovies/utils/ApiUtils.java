@@ -17,6 +17,7 @@ public class ApiUtils {
     public final static String BASE_URL                 = "https://api.themoviedb.org/3/";
     public final static String FILTER_POPULAR           = "popular";
     public final static String FILTER_TOP_RATED         = "top_rated";
+    public final static String FILTER_FAVORITES         = "favorites";
 
     public final static String IMG_SIZE_SMALL           = "w342";
     public final static String IMG_SIZE_MEDIUM          = "w500";
@@ -34,6 +35,9 @@ public class ApiUtils {
                 return ctx.getResources().getString(R.string.title_popular);
             case FILTER_TOP_RATED:
                 return ctx.getResources().getString(R.string.title_best_rated);
+            case FILTER_FAVORITES:
+                return ctx.getResources().getString(R.string.title_favorites);
+
         }
 
         return "";
