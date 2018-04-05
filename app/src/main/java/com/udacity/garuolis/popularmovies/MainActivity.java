@@ -2,6 +2,7 @@ package com.udacity.garuolis.popularmovies;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.udacity.garuolis.popularmovies.adapters.MovieListAdapter;
+import com.udacity.garuolis.popularmovies.data.MoviesContract;
 import com.udacity.garuolis.popularmovies.model.MovieItem;
 import com.udacity.garuolis.popularmovies.model.MovieList;
 import com.udacity.garuolis.popularmovies.utils.ApiUtils;
@@ -24,20 +26,24 @@ import com.udacity.garuolis.popularmovies.utils.MovieDbApi;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity  implements Callback<MovieList>, MovieListAdapter.OnClickListener {
+public class MainActivity extends AppCompatActivity  implements MovieListAdapter.OnClickListener {
     public static final String TAG = MainActivity.class.toString();
     public static final String PREF_FILTER = "order";
 
-    final List<MovieItem> movieList = new ArrayList<>();
-
+    final List<MovieItem> itemList = new ArrayList<>();
     ProgressBar mProgressBar;
-
     boolean mLoading = false;
     int mCurrentPage = 1;
 
@@ -45,7 +51,6 @@ public class MainActivity extends AppCompatActivity  implements Callback<MovieLi
     GridLayoutManager mLayoutManager;
 
     String mFilter;
-    Call<MovieList> call;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +59,9 @@ public class MainActivity extends AppCompatActivity  implements Callback<MovieLi
         setupViews();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         mFilter = prefs.getString(PREF_FILTER, ApiUtils.FILTER_POPULAR);
 
         getSupportActionBar().setTitle(ApiUtils.OrderTitle(this, mFilter));
-
         startLoadingMovies();
      }
 
@@ -91,24 +94,56 @@ public class MainActivity extends AppCompatActivity  implements Callback<MovieLi
     }
 
     public void startLoadingMovies() {
-        if (call != null && !call.isCanceled()) {
-            call.cancel();
+        if (mFilter.equals(ApiUtils.FILTER_FAVORITES)) {
+            itemList.clear();
+
+            Cursor c = getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI, null, null, null, MoviesContract.MovieEntry._ID + " DESC");
+            while (c.moveToNext()) {
+                MovieItem mi = new MovieItem();
+                mi.id   = c.getInt(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID));
+                mi.title = c.getString(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE));
+                mi.poster = c.getString(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER));
+                itemList.add(mi);
+            }
+            mAdapter.setItems(itemList);
+            setLoadingState(false);
+        } else {
+            setLoadingState(true);
+
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiUtils.BASE_URL).addConverterFactory(GsonConverterFactory.create()).addCallAdapterFactory(RxJava2CallAdapterFactory.create()).build();
+            MovieDbApi mdb = retrofit.create(MovieDbApi.class);
+
+            Observable<MovieList> listObservable = mdb.getMovieList(mFilter, mCurrentPage).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+            listObservable.subscribe(new Observer<MovieList>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+                }
+
+                @Override
+                public void onNext(MovieList movieList) {
+                    itemList.addAll(movieList.items);
+                    mAdapter.setItems(itemList);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                }
+
+                @Override
+                public void onComplete() {
+                    setLoadingState(false);
+                }
+            });
         }
-
-        setLoadingState(true);
-
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiUtils.BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-        MovieDbApi mdb = retrofit.create(MovieDbApi.class);
-        call = mdb.getMovieList(mFilter, mCurrentPage);
-        call.enqueue(this);
     }
 
+    /*
     @Override
     public void onResponse(Call<MovieList> call, Response<MovieList> response) {
         if (response.isSuccessful()) {
             MovieList movies = response.body();
-            movieList.addAll(movies.items);
-            mAdapter.setItems(movieList);
+            itemList.addAll(movies.items);
+            mAdapter.setItems(itemList);
         } else {
             onFailure(call, null);
         }
@@ -120,7 +155,7 @@ public class MainActivity extends AppCompatActivity  implements Callback<MovieLi
     public void onFailure(Call<MovieList> call, Throwable t) {
         Toast.makeText(this, R.string.error_failed_to_load_data, Toast.LENGTH_LONG).show();
         setLoadingState(false);
-    }
+    }*/
 
     public void setLoadingState(boolean loading) {
         mLoading = loading;
@@ -142,7 +177,7 @@ public class MainActivity extends AppCompatActivity  implements Callback<MovieLi
             edit.apply();
 
             mCurrentPage = 1;
-            movieList.clear();
+            itemList.clear();
             mAdapter.clearItems();
 
             startLoadingMovies();
@@ -151,9 +186,7 @@ public class MainActivity extends AppCompatActivity  implements Callback<MovieLi
 
     @Override
     public void onItemClick(View v, int position) {
-        Log.v(TAG, movieList.get(position).title);
-
-        MovieItem item = movieList.get(position);
+        MovieItem item = itemList.get(position);
 
         Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra(DetailsActivity.EXTRA_MOVIE_ID, item.id);
@@ -172,6 +205,10 @@ public class MainActivity extends AppCompatActivity  implements Callback<MovieLi
             case R.id.mi_top:
                 changeListFilter(ApiUtils.FILTER_TOP_RATED);
             return true;
+
+            case R.id.mi_favorites:
+                changeListFilter(ApiUtils.FILTER_FAVORITES);
+                break;
         }
 
         return super.onOptionsItemSelected(item);

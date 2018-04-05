@@ -7,14 +7,8 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class MovieItem {
-    public String title;
     public int id;
-
-    @SerializedName("vote_count")
-    public int votes;
-
-    @SerializedName("vote_average")
-    public float averageVote;
+    public String title;
 
     @SerializedName("poster_path")
     public String poster;
