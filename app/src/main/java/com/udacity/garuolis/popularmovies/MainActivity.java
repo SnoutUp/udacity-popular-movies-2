@@ -3,11 +3,13 @@ package com.udacity.garuolis.popularmovies;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,11 +38,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity  implements MovieListAdapter.OnClickListener {
     public static final String TAG = MainActivity.class.toString();
-    public static final String PREF_FILTER = "order";
+    public static final String PREF_FILTER              = "order";
 
-    final List<MovieItem> itemList          = new ArrayList<>();
-    final List<MovieItem> favoriteMovies    = new ArrayList<>();
+    public static final String BUNDLE_RECYCLER_STATE    = "recyclerview_state";
+    public static final String BUNDLE_LIST_ITEMS        = "list_items";
+
+    ArrayList<MovieItem> itemList          = new ArrayList<>();
+    ArrayList<MovieItem> favoriteMovies    = new ArrayList<>();
+
     ProgressBar mProgressBar;
+
     boolean mLoading = false;
     int mCurrentPage = 1;
 
@@ -62,11 +69,17 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
 
         getSupportActionBar().setTitle(ApiUtils.OrderTitle(this, mFilter));
 
-        setupViews();
-        startLoadingMovies();
+        setupViews(savedInstanceState);
      }
 
-    public void setupViews() {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_RECYCLER_STATE, mRecycler.getLayoutManager().onSaveInstanceState());
+        outState.putParcelableArrayList(BUNDLE_LIST_ITEMS, itemList);
+    }
+
+    public void setupViews(Bundle savedState) {
         mProgressBar = findViewById(R.id.pb_loading);
 
         mLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.movie_grid_column_count));
@@ -94,15 +107,31 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
         };
 
         mRecycler.addOnScrollListener(mScrollListener);
+
+        if (savedState != null) {
+            itemList = savedState.getParcelableArrayList(BUNDLE_LIST_ITEMS);
+            mRecycler.getLayoutManager().onRestoreInstanceState(savedState.getParcelable(BUNDLE_RECYCLER_STATE));
+        } else {
+            startLoadingMovies();
+        }
+    }
+
+    private void updateAdapterItems() {
+        if (mFilter.equals(ApiUtils.FILTER_FAVORITES)) {
+            mAdapter.setItems(favoriteMovies);
+        } else {
+            mAdapter.setItems(itemList);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadFavoriteMovies();
+        reloadFavoriteMovies();
+        updateAdapterItems();
     }
 
-    public void loadFavoriteMovies() {
+    public void reloadFavoriteMovies() {
         favoriteMovies.clear();
         Cursor c = getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI, null, null, null, MoviesContract.MovieEntry._ID + " DESC");
         if (c != null) {
@@ -116,9 +145,7 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
         }
 
 
-        if (mFilter.equals(ApiUtils.FILTER_FAVORITES)) {
-            mAdapter.setItems(favoriteMovies);
-        }
+        updateAdapterItems();
     }
 
     public void startLoadingMovies() {
@@ -137,7 +164,7 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
                 @Override
                 public void onNext(MovieList movieList) {
                     itemList.addAll(movieList.items);
-                    mAdapter.setItems(itemList);
+                    updateAdapterItems();
                     mCurrentPage++;
                 }
 
@@ -181,7 +208,7 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
             mAdapter.clearItems();
 
             startLoadingMovies();
-            loadFavoriteMovies();
+            reloadFavoriteMovies();
         }
     }
 

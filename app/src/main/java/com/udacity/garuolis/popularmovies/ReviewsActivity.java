@@ -16,6 +16,7 @@ import com.udacity.garuolis.popularmovies.model.MovieReviewList;
 import com.udacity.garuolis.popularmovies.utils.ApiUtils;
 import com.udacity.garuolis.popularmovies.utils.MovieDbApi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -28,11 +29,16 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ReviewsActivity extends AppCompatActivity {
+    public static final String BUNDLE_RECYCLER_STATE    = "recyclerview_state";
+    public static final String BUNDLE_LIST_ITEMS        = "list_items";
+
     ProgressBar mProgressBar;
     boolean mLoading = false;
     int mCurrentPage = 1;
     ReviewListAdapter mAdapter;
+    RecyclerView mRecycler;
 
+    ArrayList<MovieReview> reviews = new ArrayList<>();
     MovieItem mItem;
 
     @Override
@@ -44,12 +50,11 @@ public class ReviewsActivity extends AppCompatActivity {
         mItem = getIntent().getParcelableExtra(DetailsActivity.EXTRA_MOVIE_PARCEL);
 
         if (mItem != null) {
-            setupViews();
-            loadReviews();
+            setupViews(savedInstanceState);
         }
     }
 
-    private void updateViews(List<MovieReview> reviews) {
+    private void updateViews() {
         mAdapter.setItems(reviews);
 
         if (reviews.size() == 0) {
@@ -59,6 +64,7 @@ public class ReviewsActivity extends AppCompatActivity {
             findViewById(R.id.rv_review_list).setVisibility(View.VISIBLE);
             findViewById(R.id.tv_empty).setVisibility(View.GONE);
         }
+        setLoadingState(false);
     }
 
     private void loadReviews() {
@@ -76,8 +82,7 @@ public class ReviewsActivity extends AppCompatActivity {
 
             @Override
             public void onNext(MovieReviewList movieReviewList) {
-                updateViews(movieReviewList.items);
-
+                reviews.addAll(movieReviewList.items);
             }
 
             @Override
@@ -88,21 +93,36 @@ public class ReviewsActivity extends AppCompatActivity {
 
             @Override
             public void onComplete() {
-                setLoadingState(false);
+                updateViews();
             }
         });
 
     }
 
-    private void setupViews() {
+    private void setupViews(Bundle savedState) {
         mProgressBar = findViewById(R.id.pb_loading);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        RecyclerView rv = findViewById(R.id.rv_review_list);
-        rv.setLayoutManager(layoutManager);
+        mRecycler = findViewById(R.id.rv_review_list);
+        mRecycler.setLayoutManager(layoutManager);
 
         mAdapter = new ReviewListAdapter(this);
-        rv.setAdapter(mAdapter);
+        mRecycler.setAdapter(mAdapter);
+
+        if (savedState != null) {
+            reviews = savedState.getParcelableArrayList(BUNDLE_LIST_ITEMS);
+            mRecycler.getLayoutManager().onRestoreInstanceState(savedState.getParcelable(BUNDLE_RECYCLER_STATE));
+            updateViews();
+        } else {
+            loadReviews();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_RECYCLER_STATE, mRecycler.getLayoutManager().onSaveInstanceState());
+        outState.putParcelableArrayList(BUNDLE_LIST_ITEMS, reviews);
     }
 
     public void setLoadingState(boolean loading) {

@@ -30,9 +30,6 @@ public class Movie {
     public String poster;
 
     public int runtime;
-    public int revenue;
-
-    public String tagline;
 
     public List<MovieGenre> genres;
 

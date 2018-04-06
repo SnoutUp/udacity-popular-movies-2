@@ -77,7 +77,6 @@ public class DetailsActivity extends AppCompatActivity implements VideoListAdapt
 
         mBinding.rvVideos.setAdapter(mVideoAdapter);
         mBinding.rvVideos.setLayoutManager(layoutManager);
-
         mBinding.piPager.attachToRecyclerView(mBinding.rvVideos);
 
         SnapHelper snapHelper = new SimpleSnapHelper(mBinding.piPager);
@@ -240,8 +239,10 @@ public class DetailsActivity extends AppCompatActivity implements VideoListAdapt
 
     @Override
     public void playVideo(String videoUrl) {
-
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl)));
+        Intent playIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl));
+        if (playIntent.resolveActivity(getPackageManager()) != null){
+            startActivity(playIntent);
+        }
     }
 
     @Override
