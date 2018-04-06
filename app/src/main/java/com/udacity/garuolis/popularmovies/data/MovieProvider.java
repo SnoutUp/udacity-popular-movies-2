@@ -41,7 +41,6 @@ public class MovieProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
         Cursor retCursor;
         switch(sUriMatcher.match(uri)){
-            // All Flavors selected
             case MOVIE:{
                 retCursor = dbHelper.getReadableDatabase().query(
                         MoviesContract.MovieEntry.TABLE_FAVORITES,
