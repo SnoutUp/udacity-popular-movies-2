@@ -18,7 +18,7 @@ Student: Aurimas Garuolis
  * RxJava to update UI with data changes
  * Retrofit with GSON Converter & RxJava2CallAdapterFactory for API calls and data processing
  * Picasso for image loading
- * Overflow Pager Indicator for better video list UI 
+ * [Overflow Pager Indicator](https://github.com/intik/overflow-pager-indicator) for better video list UI 
 
 
 ## Important Notes
