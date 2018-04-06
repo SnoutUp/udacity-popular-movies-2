@@ -1,6 +1,10 @@
 package com.udacity.garuolis.popularmovies.model;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 /**
  * Created by Aurimas on 2018.03.09.
@@ -24,4 +28,16 @@ public class Movie {
 
     @SerializedName("poster_path")
     public String poster;
+
+    public int runtime;
+    public int revenue;
+
+    public String tagline;
+
+    public List<MovieGenre> genres;
+
+    public String getReleaseYear() {
+        String[] dateParts = TextUtils.split(releaseDate, "-");
+        return dateParts[0];
+    }
 }

@@ -7,12 +7,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.udacity.garuolis.popularmovies.adapters.ReviewListAdapter;
+import com.udacity.garuolis.popularmovies.model.MovieItem;
+import com.udacity.garuolis.popularmovies.model.MovieReview;
 import com.udacity.garuolis.popularmovies.model.MovieReviewList;
 import com.udacity.garuolis.popularmovies.utils.ApiUtils;
 import com.udacity.garuolis.popularmovies.utils.MovieDbApi;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -24,24 +28,37 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ReviewsActivity extends AppCompatActivity {
-    private int movieId;
-
     ProgressBar mProgressBar;
     boolean mLoading = false;
     int mCurrentPage = 1;
     ReviewListAdapter mAdapter;
 
+    MovieItem mItem;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviews);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        movieId = getIntent().getIntExtra(DetailsActivity.EXTRA_MOVIE_ID, 0);
-        String movieTitle = getIntent().getStringExtra(DetailsActivity.EXTRA_MOVIE_TITLE);
 
-        setupViews();
-        loadReviews();
+        mItem = getIntent().getParcelableExtra(DetailsActivity.EXTRA_MOVIE_PARCEL);
+
+        if (mItem != null) {
+            setupViews();
+            loadReviews();
+        }
+    }
+
+    private void updateViews(List<MovieReview> reviews) {
+        mAdapter.setItems(reviews);
+
+        if (reviews.size() == 0) {
+            findViewById(R.id.tv_empty).setVisibility(View.VISIBLE);
+            findViewById(R.id.rv_review_list).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.rv_review_list).setVisibility(View.VISIBLE);
+            findViewById(R.id.tv_empty).setVisibility(View.GONE);
+        }
     }
 
     private void loadReviews() {
@@ -50,7 +67,7 @@ public class ReviewsActivity extends AppCompatActivity {
         Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiUtils.BASE_URL).addConverterFactory(GsonConverterFactory.create()).addCallAdapterFactory(RxJava2CallAdapterFactory.create()).build();
         MovieDbApi mdb = retrofit.create(MovieDbApi.class);
 
-        Observable<MovieReviewList> reviewListObservable = mdb.getMovieReviews(movieId).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+        Observable<MovieReviewList> reviewListObservable = mdb.getMovieReviews(mItem.id).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
         reviewListObservable.subscribe(new Observer<MovieReviewList>() {
             @Override
             public void onSubscribe(Disposable d) {
@@ -59,12 +76,14 @@ public class ReviewsActivity extends AppCompatActivity {
 
             @Override
             public void onNext(MovieReviewList movieReviewList) {
-                mAdapter.addItems(movieReviewList.items);
+                updateViews(movieReviewList.items);
+
             }
 
             @Override
             public void onError(Throwable e) {
-
+                Toast.makeText(ReviewsActivity.this, R.string.error_failed_to_load_data, Toast.LENGTH_LONG).show();
+                setLoadingState(false);
             }
 
             @Override

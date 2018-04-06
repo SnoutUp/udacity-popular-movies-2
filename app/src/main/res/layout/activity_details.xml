@@ -9,34 +9,61 @@
         android:layout_height="wrap_content">
 
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/wrap_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="32dp">
 
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_videos"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/colorBlack"
+                app:layout_constraintDimensionRatio="16:9"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </android.support.v7.widget.RecyclerView>
+
+            <cz.intik.overflowindicator.OverflowPagerIndicator
+                android:id="@+id/pi_pager"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+
+                app:layout_constraintBottom_toBottomOf="@id/rv_videos"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
             <ImageView
                 android:id="@+id/iv_poster"
-                android:layout_width="200dp"
+                android:layout_width="160dp"
                 android:layout_height="0dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:background="@color/colorLtGrey"
                 android:contentDescription="@string/poster_description"
                 android:scaleType="centerCrop"
                 app:layout_constraintDimensionRatio="10:16"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_original_title"/>
 
             <TextView
                 android:id="@+id/tv_title"
                 style="@style/MovieTitle"
+
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rv_videos"
                 tools:text="Maze Runner"/>
 
             <TextView
@@ -45,8 +72,8 @@
                 android:visibility="gone"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_title"
@@ -54,55 +81,74 @@
 
             <TextView
                 android:id="@+id/tv_release_date"
-                style="@style/MovieInfoLabel"
+                style="@style/MovieYearLabel"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="8dp"
-                android:drawableLeft="@drawable/ic_date"
-                android:drawableStart="@drawable/ic_date"
-                app:layout_constraintEnd_toStartOf="@+id/tv_user_rating"
-                app:layout_constraintHorizontal_bias="0.5"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
                 app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/iv_poster"
+                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintTop_toBottomOf="@+id/tv_original_title"
                 tools:text="2018-07-11"/>
 
             <TextView
                 android:id="@+id/tv_user_rating"
                 style="@style/MovieInfoLabel"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:drawableLeft="@drawable/ic_rating"
                 android:drawableStart="@drawable/ic_rating"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/tv_release_date"
-                app:layout_constraintTop_toBottomOf="@+id/iv_poster"
+                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintTop_toBottomOf="@+id/tv_genres"
                 tools:text="5/10"/>
+
+            <TextView
+                android:id="@+id/tv_runtime"
+                style="@style/MovieInfoLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
+                android:drawableLeft="@drawable/ic_clock"
+                android:drawableStart="@drawable/ic_clock"
+                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintTop_toBottomOf="@+id/tv_user_rating"
+                tools:text="120min"/>
+
+            <TextView
+                android:id="@+id/tv_genres"
+                style="@style/MovieGenreLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="6dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintTop_toBottomOf="@+id/tv_release_date"
+                tools:text="Comedy"/>
 
             <TextView
                 android:id="@+id/tv_plot_synopsis"
                 style="@style/MovieDescription"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_release_date"
+                app:layout_constraintTop_toBottomOf="@+id/iv_poster"
                 tools:text="It is not a very good movie, since there's only one maze and it's not fun to run at all."/>
-
-            <LinearLayout
-                android:id="@+id/wrap_videos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@+id/tv_plot_synopsis"/>
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
 </layout>

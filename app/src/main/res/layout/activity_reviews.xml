@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context="com.udacity.garuolis.popularmovies.MainActivity">
 
+    <TextView
+        android:id="@+id/tv_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/error_no_reviews"
+        android:visibility="gone"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_review_list"
         android:layout_width="match_parent"

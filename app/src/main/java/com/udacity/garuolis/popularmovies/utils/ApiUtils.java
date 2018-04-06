@@ -22,11 +22,30 @@ public class ApiUtils {
     public final static String IMG_SIZE_SMALL           = "w342";
     public final static String IMG_SIZE_MEDIUM          = "w500";
 
+    public final static String VIDEO_SITE_YOUTUBE       = "YouTube";
+
     private final static String BASE_IMAGE_PATH         = "http://image.tmdb.org/t/p/";
     public final static String DEFAULT_ORDER            = FILTER_POPULAR;
 
     public static String ImageUrl(String posterPath, final String size) {
         return BASE_IMAGE_PATH + "/" + size + posterPath;
+    }
+
+    public static String VideoURL(final String site, String key) {
+        switch (site) {
+            case VIDEO_SITE_YOUTUBE:
+                return "https://www.youtube.com/watch?v=" + key;
+        }
+
+        return key;
+    }
+
+    public static String VideoThumbURL(final String site, String key) {
+        switch (site) {
+            case VIDEO_SITE_YOUTUBE:
+                return "https://img.youtube.com/vi/" + key + "/mqdefault.jpg";
+        }
+        return null;
     }
 
     public static String OrderTitle(Context ctx, final String order) {

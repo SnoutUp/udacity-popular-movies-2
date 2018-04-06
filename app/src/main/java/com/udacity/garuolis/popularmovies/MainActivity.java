@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,9 +30,6 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -42,26 +38,31 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
     public static final String TAG = MainActivity.class.toString();
     public static final String PREF_FILTER = "order";
 
-    final List<MovieItem> itemList = new ArrayList<>();
+    final List<MovieItem> itemList          = new ArrayList<>();
+    final List<MovieItem> favoriteMovies    = new ArrayList<>();
     ProgressBar mProgressBar;
     boolean mLoading = false;
     int mCurrentPage = 1;
 
     MovieListAdapter mAdapter;
     GridLayoutManager mLayoutManager;
+    RecyclerView mRecycler;
 
     String mFilter;
+
+    RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupViews();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         mFilter = prefs.getString(PREF_FILTER, ApiUtils.FILTER_POPULAR);
 
         getSupportActionBar().setTitle(ApiUtils.OrderTitle(this, mFilter));
+
+        setupViews();
         startLoadingMovies();
      }
 
@@ -70,14 +71,14 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
 
         mLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.movie_grid_column_count));
 
-        RecyclerView rv = findViewById(R.id.rv_movie_grid);
-        rv.setLayoutManager(mLayoutManager);
+        mRecycler = findViewById(R.id.rv_movie_grid);
+        mRecycler.setLayoutManager(mLayoutManager);
 
         mAdapter = new MovieListAdapter(this);
         mAdapter.setOnClickListener(this);
-        rv.setAdapter(mAdapter);
+        mRecycler.setAdapter(mAdapter);
 
-        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -86,28 +87,42 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
                 int totalCount = mLayoutManager.getItemCount();
                 int firstPosition = mLayoutManager.findFirstVisibleItemPosition();
 
-                if (!mLoading && visibleItemCount + firstPosition >= totalCount - getResources().getInteger(R.integer.movie_grid_column_count) * 2 ) {
+                if (!mLoading && visibleItemCount + firstPosition >= totalCount - getResources().getInteger(R.integer.movie_grid_column_count) * 2  && dy != 0) {
                     startLoadingMovies();
                 }
             }
-        });
+        };
+
+        mRecycler.addOnScrollListener(mScrollListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadFavoriteMovies();
+    }
+
+    public void loadFavoriteMovies() {
+        favoriteMovies.clear();
+        Cursor c = getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI, null, null, null, MoviesContract.MovieEntry._ID + " DESC");
+        if (c != null) {
+            while (c.moveToNext()) {
+                MovieItem mi = new MovieItem();
+                mi.id = c.getInt(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID));
+                mi.title = c.getString(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE));
+                mi.poster = c.getString(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER));
+                favoriteMovies.add(mi);
+            }
+        }
+
+
+        if (mFilter.equals(ApiUtils.FILTER_FAVORITES)) {
+            mAdapter.setItems(favoriteMovies);
+        }
     }
 
     public void startLoadingMovies() {
-        if (mFilter.equals(ApiUtils.FILTER_FAVORITES)) {
-            itemList.clear();
-
-            Cursor c = getContentResolver().query(MoviesContract.MovieEntry.CONTENT_URI, null, null, null, MoviesContract.MovieEntry._ID + " DESC");
-            while (c.moveToNext()) {
-                MovieItem mi = new MovieItem();
-                mi.id   = c.getInt(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_MOVIE_ID));
-                mi.title = c.getString(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE));
-                mi.poster = c.getString(c.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER));
-                itemList.add(mi);
-            }
-            mAdapter.setItems(itemList);
-            setLoadingState(false);
-        } else {
+        if (!mFilter.equals(ApiUtils.FILTER_FAVORITES)) {
             setLoadingState(true);
 
             Retrofit retrofit = new Retrofit.Builder().baseUrl(ApiUtils.BASE_URL).addConverterFactory(GsonConverterFactory.create()).addCallAdapterFactory(RxJava2CallAdapterFactory.create()).build();
@@ -123,10 +138,13 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
                 public void onNext(MovieList movieList) {
                     itemList.addAll(movieList.items);
                     mAdapter.setItems(itemList);
+                    mCurrentPage++;
                 }
 
                 @Override
                 public void onError(Throwable e) {
+                    Toast.makeText(MainActivity.this, R.string.error_failed_to_load_data, Toast.LENGTH_LONG).show();
+                    setLoadingState(false);
                 }
 
                 @Override
@@ -134,28 +152,10 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
                     setLoadingState(false);
                 }
             });
-        }
-    }
-
-    /*
-    @Override
-    public void onResponse(Call<MovieList> call, Response<MovieList> response) {
-        if (response.isSuccessful()) {
-            MovieList movies = response.body();
-            itemList.addAll(movies.items);
-            mAdapter.setItems(itemList);
         } else {
-            onFailure(call, null);
+            setLoadingState(false);
         }
-        setLoadingState(false);
-        mCurrentPage++;
     }
-
-    @Override
-    public void onFailure(Call<MovieList> call, Throwable t) {
-        Toast.makeText(this, R.string.error_failed_to_load_data, Toast.LENGTH_LONG).show();
-        setLoadingState(false);
-    }*/
 
     public void setLoadingState(boolean loading) {
         mLoading = loading;
@@ -185,12 +185,9 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
     }
 
     @Override
-    public void onItemClick(View v, int position) {
-        MovieItem item = itemList.get(position);
-
+    public void onMovieSelected(MovieItem mi) {
         Intent intent = new Intent(this, DetailsActivity.class);
-        intent.putExtra(DetailsActivity.EXTRA_MOVIE_ID, item.id);
-        intent.putExtra(DetailsActivity.EXTRA_MOVIE_TITLE, item.title);
+        intent.putExtra(DetailsActivity.EXTRA_MOVIE_PARCEL, mi);
         startActivity(intent);
     }
 

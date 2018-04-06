@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.ViewHolder> {
-    List<MovieReview> items;
-    Context mContext;
+    final List<MovieReview> items;
+    final Context mContext;
 
     public ReviewListAdapter(Context context) {
         mContext = context;
@@ -35,7 +35,8 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.Vi
         holder.mContentLabel.setText(rv.content);
     }
 
-    public void addItems(List<MovieReview> newItems) {
+    public void setItems(List<MovieReview> newItems) {
+        items.clear();
         items.addAll(newItems);
         notifyDataSetChanged();
     }

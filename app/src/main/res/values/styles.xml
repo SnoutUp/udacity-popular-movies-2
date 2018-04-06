@@ -15,15 +15,15 @@
     </style>
 
     <style name="MovieTitle" parent="TextAppearance.AppCompat.Headline">
-        <item name="android:textSize">32sp</item>
+        <item name="android:textSize">@dimen/dimen_movie_title_size</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">center_vertical</item>
     </style>
 
     <style name="MovieSubtitle" parent="TextAppearance.AppCompat.Headline">
         <item name="android:textSize">24sp</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">center_vertical</item>
         <item name="android:textColor">#777777</item>
     </style>
 
@@ -31,11 +31,23 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="MovieYearLabel" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/dimen_movie_year_size</item>
+    </style>
+
     <style name="MovieInfoLabel" parent="TextAppearance.AppCompat.Caption">
         <item name="android:gravity">center_vertical</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:drawablePadding">4dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:drawablePadding">6dp</item>
+    </style>
+
+    <style name="MovieGenreLabel" parent="TextAppearance.AppCompat.Caption">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">22sp</item>
+
     </style>
 
 

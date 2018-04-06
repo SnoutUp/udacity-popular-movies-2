@@ -1,6 +1,5 @@
 package com.udacity.garuolis.popularmovies.utils;
 
-import com.google.gson.JsonObject;
 import com.udacity.garuolis.popularmovies.BuildConfig;
 import com.udacity.garuolis.popularmovies.model.Movie;
 import com.udacity.garuolis.popularmovies.model.MovieList;
@@ -9,7 +8,6 @@ import com.udacity.garuolis.popularmovies.model.MovieVideoList;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
