@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity  implements MovieListAdapter
             mAdapter.clearItems();
 
             startLoadingMovies();
+            loadFavoriteMovies();
         }
     }
 
